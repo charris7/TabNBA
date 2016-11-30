@@ -6,6 +6,7 @@ import csv
 import datetime
 import dataextract as tde
 
+#NBA seasons to pull data for
 seasons = ['2013-14','2014-15','2015-16','2016-17']
 
 #This part grabs all of the unique player identifiers for the current NBA season
@@ -17,12 +18,12 @@ players = [str(i) for i in players]
 
 #Create a base .csv file to append the shot chart data to
 #Create a single row that includes only the column headers
-with open('TabNBA.csv', 'w') as csvfile: #Creates a .csv named NBAShotChartData in the same directory as this script
+with open('TabNBA.csv', 'w') as csvfile:
     fieldnames = ["SHOT_NUMBER","GRID_TYPE","GAME_ID","GAME_EVENT_ID","PLAYER_ID","PLAYER_NAME","TEAM_ID","TEAM_NAME","PERIOD","MINUTES_REMAINING","SECONDS_REMAINING","EVENT_TYPE","ACTION_TYPE","SHOT_TYPE","SHOT_ZONE_BASIC","SHOT_ZONE_AREA","SHOT_ZONE_RANGE","SHOT_DISTANCE","LOC_X","LOC_Y","SHOT_ATTEMPTED_FLAG","SHOT_MADE_FLAG","GAME_DATE","HTM","VTM","SEASON","DATE_OF_GAME"]#,"GAME_NUMBER"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
 
-#Function that accepts a playerID and appends all data received from the api to our NBAShotChartData.csv that we created in the step above
+#Function that accepts a season and player, and appends all data received from the api to TabNBA.csv that was created in the step above
 def shot_charts(season, player):
     shot_chart_url = 'http://stats.nba.com/stats/shotchartdetail?Period=0&VsConference=&LeagueID=00&LastNGames=0&TeamID=0&Position=&PlayerPosition=&Location=&Outcome=&ContextMeasure=FGA&DateFrom=&StartPeriod=&DateTo=&OpponentTeamID=0&ContextFilter=&RangeType=&Season='+season+'&AheadBehind=&PlayerID='+player+'&EndRange=&VsDivision=&PointDiff=&RookieYear=&GameSegment=&Month=0&ClutchTime=&StartRange=&EndPeriod=&SeasonType=Regular+Season&SeasonSegment=&GameID='
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0'}
@@ -40,18 +41,18 @@ def shot_charts(season, player):
     with open('TabNBA.csv', 'a') as f:
         df.to_csv(f, header=False)
 
-#Run the function above for all playerIDs in the players dictionary    
+#Run the function above for all currently active NBA players, for all seasons in the seasons list    
 for season in seasons:
     for player in players:
         shot_charts(season, player)
 
-#Create a .tde named NBAShotChartData
+#Create TDE file
 tdefile = tde.Extract('TabNBA.tde')
 
-#Read data from our NBAShotChartData.csv that we created in the steps above
+#Read data from the TabNBA.csv that was created in the steps above
 csvReader = csv.reader(open('TabNBA.csv','rb'), delimiter=',', quotechar='"')
 
-#I believe this says... if the extract already exists then use the extracts existing definitions... if not then use the definitions defined below
+#Create TDE structure
 if tdefile.hasTable('Extract'):
     table = tdefile.openTable('Extract')
     tableDef = table.getTableDefinition()
@@ -87,6 +88,7 @@ else:
     #tableDef.addColumn('GAME_NUMBER',         tde.Type.INTEGER)  
     table = tdefile.addTable('Extract',tableDef)
     
+#Put data into the TDE
 newrow = tde.Row(tableDef)
 csvReader.next() 
 for line in csvReader:    
