@@ -102,7 +102,7 @@ for line in csvReader:
     newrow.setCharString(7,line[7])
     newrow.setInteger(8, int(line[8]))
     newrow.setInteger(9, int(line[9]))
-    newrow.setInteger(10, int(line[10]))
+    newrow.setInteger(10,int(line[10]))
     newrow.setCharString(11,line[11])
     newrow.setCharString(12,line[12])
     newrow.setCharString(13,line[13])
